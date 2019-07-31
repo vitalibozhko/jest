@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import prettyFormat from 'pretty-format';
-import {FailedAssertion} from '@jest/test-result';
+// import prettyFormat from 'pretty-format';
+import { FailedAssertion } from '@jest/test-result';
 
-function messageFormatter({error, message, passed}: Options) {
+function messageFormatter({ error, message, passed }: Options) {
   if (passed) {
     return 'Passed.';
   }
@@ -27,7 +27,8 @@ function messageFormatter({error, message, passed}: Options) {
   ) {
     return `${error.name}: ${error.message}`;
   }
-  return `thrown: ${prettyFormat(error, {maxDepth: 3})}`;
+  return `thrown: ${error.toString()}`;
+  // return `thrown: ${prettyFormat(error, { maxDepth: 3 })}`;
 }
 
 function stackFormatter(
@@ -50,6 +51,7 @@ function stackFormatter(
   }
 
   if (initError) {
+    initError.stack = initError.stack;
     return errorMessage.trimRight() + '\n\n' + initError.stack;
   }
 

@@ -6,9 +6,9 @@
  */
 
 import fs from 'fs';
-import {Config} from '@jest/types';
+import { Config } from '@jest/types';
 
-import {getTopFrame, getStackTraceLines} from 'jest-message-util';
+import { getTopFrame, getStackTraceLines } from 'jest-message-util';
 import {
   saveSnapshotFile,
   getSnapshotData,
@@ -17,8 +17,9 @@ import {
   testNameToKey,
   unescape,
 } from './utils';
-import {saveInlineSnapshots, InlineSnapshot} from './inline_snapshots';
-import {SnapshotData} from './types';
+// import {saveInlineSnapshots, InlineSnapshot} from './inline_snapshots';
+import { InlineSnapshot } from './inline_snapshots';
+import { SnapshotData } from './types';
 
 export type SnapshotStateOptions = {
   updateSnapshot: Config.SnapshotUpdateState;
@@ -56,7 +57,7 @@ export default class SnapshotState {
 
   constructor(snapshotPath: Config.Path, options: SnapshotStateOptions) {
     this._snapshotPath = snapshotPath;
-    const {data, dirty} = getSnapshotData(
+    const { data, dirty } = getSnapshotData(
       this._snapshotPath,
       options.updateSnapshot,
     );
@@ -87,7 +88,7 @@ export default class SnapshotState {
   private _addSnapshot(
     key: string,
     receivedSerialized: string,
-    options: {isInline: boolean; error?: Error},
+    options: { isInline: boolean; error?: Error },
   ) {
     this._dirty = true;
     if (options.isInline) {
@@ -125,6 +126,7 @@ export default class SnapshotState {
       if (hasInlineSnapshots) {
         const prettier = this._getPrettier(); // Load lazily
         const babelTraverse = this._getBabelTraverse(); // Load lazily
+        const { saveInlineSnapshots } = require('./inline_snapshots');
         saveInlineSnapshots(this._inlineSnapshots, prettier, babelTraverse);
       }
       status.saved = true;
@@ -213,12 +215,12 @@ export default class SnapshotState {
           } else {
             this.added++;
           }
-          this._addSnapshot(key, receivedSerialized, {error, isInline});
+          this._addSnapshot(key, receivedSerialized, { error, isInline });
         } else {
           this.matched++;
         }
       } else {
-        this._addSnapshot(key, receivedSerialized, {error, isInline});
+        this._addSnapshot(key, receivedSerialized, { error, isInline });
         this.added++;
       }
 

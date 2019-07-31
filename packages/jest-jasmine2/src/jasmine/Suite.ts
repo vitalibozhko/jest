@@ -30,11 +30,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /* eslint-disable sort-keys */
 
-import {convertDescriptorToString} from 'jest-util';
-import {Config} from '@jest/types';
+// import { convertDescriptorToString } from 'jest-util';
+import { Config } from '@jest/types';
 import ExpectationFailed from '../ExpectationFailed';
 import expectationResultFactory from '../expectationResultFactory';
-import {QueueableFn} from '../queueRunner';
+import { QueueableFn } from '../queueRunner';
 import Spec from './Spec';
 
 export type SuiteResult = {
@@ -214,7 +214,7 @@ export default class Suite {
     }
   }
 
-  execute(..._args: Array<any>) {}
+  execute(..._args: Array<any>) { }
 }
 
 function isAfterAll(children: Array<Spec | Suite>) {
@@ -223,4 +223,31 @@ function isAfterAll(children: Array<Spec | Suite>) {
 
 function isFailure(args: Array<unknown>) {
   return !args[0];
+}
+
+function convertDescriptorToString(descriptor: any) {
+  if (
+    typeof descriptor === 'string' ||
+    typeof descriptor === 'number' ||
+    descriptor === undefined
+  ) {
+    return descriptor;
+  }
+
+  if (typeof descriptor !== 'function') {
+    throw new Error('describe expects a class, function, number, or string.');
+  }
+
+  if (descriptor.name !== undefined) {
+    return descriptor.name;
+  }
+
+  const stringified = descriptor.toString();
+  const typeDescriptorMatch = stringified.match(/class|function/);
+  const indexOfNameSpace =
+    typeDescriptorMatch.index + typeDescriptorMatch[0].length;
+  const indexOfNameAfterSpace = stringified.search(/\(|\{/, indexOfNameSpace);
+  const name = stringified.substring(indexOfNameSpace, indexOfNameAfterSpace);
+
+  return name.trim();
 }

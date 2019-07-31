@@ -30,17 +30,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /* eslint-disable sort-keys */
 
-import {AssertionError} from 'assert';
-import {Config} from '@jest/types';
-import {FailedAssertion, Milliseconds, Status} from '@jest/test-result';
+import { AssertionError } from 'assert';
+import { Config } from '@jest/types';
+import { FailedAssertion, Milliseconds, Status } from '@jest/test-result';
 
 import ExpectationFailed from '../ExpectationFailed';
 import expectationResultFactory, {
   Options as ExpectationResultFactoryOptions,
 } from '../expectationResultFactory';
-import assertionErrorMessage from '../assertionErrorMessage';
-import queueRunner, {QueueableFn} from '../queueRunner';
-import {AssertionErrorWithStack} from '../types';
+// import assertionErrorMessage from '../assertionErrorMessage';
+import queueRunner, { QueueableFn } from '../queueRunner';
+import { AssertionErrorWithStack } from '../types';
 
 export type Attributes = {
   id: string;
@@ -108,27 +108,27 @@ export default class Spec {
   }
 
   constructor(attrs: Attributes) {
-    this.resultCallback = attrs.resultCallback || function() {};
+    this.resultCallback = attrs.resultCallback || function () { };
     this.id = attrs.id;
     this.description = attrs.description || '';
     this.queueableFn = attrs.queueableFn;
     this.beforeAndAfterFns =
       attrs.beforeAndAfterFns ||
-      function() {
-        return {befores: [], afters: []};
+      function () {
+        return { befores: [], afters: [] };
       };
     this.userContext =
       attrs.userContext ||
-      function() {
+      function () {
         return {};
       };
-    this.onStart = attrs.onStart || function() {};
+    this.onStart = attrs.onStart || function () { };
     this.getSpecName =
       attrs.getSpecName ||
-      function() {
+      function () {
         return '';
       };
-    this.queueRunnerFactory = attrs.queueRunnerFactory || function() {};
+    this.queueRunnerFactory = attrs.queueRunnerFactory || function () { };
     this.throwOnExpectationFailure = !!attrs.throwOnExpectationFailure;
 
     this.initError = new Error();
@@ -138,7 +138,7 @@ export default class Spec {
     // in the stack in the Error object. This line stringifies the stack
     // property to allow garbage-collecting objects on the stack
     // https://crbug.com/v8/7142
-    this.initError.stack = this.initError.stack;
+    // this.initError.stack = this.initError.stack;
 
     this.queueableFn.initError = this.initError;
 
@@ -198,7 +198,7 @@ export default class Spec {
       userContext: this.userContext(),
       setTimeout,
       clearTimeout,
-      fail: () => {},
+      fail: () => { },
     });
 
     this.currentRun.then(() => complete(true));
@@ -238,7 +238,11 @@ export default class Spec {
         actual: '',
         error:
           error instanceof AssertionError
-            ? assertionErrorMessage(error, {expand: this.expand})
+            ? (() => {
+              const assertionErrorMessage = require('../assertionErrorMessage');
+
+              assertionErrorMessage(error, { expand: this.expand })
+            })()
             : error,
       },
       true,
@@ -296,7 +300,7 @@ export default class Spec {
 
 Spec.pendingSpecExceptionMessage = '=> marked Pending';
 
-const extractCustomPendingMessage = function(e: Error) {
+const extractCustomPendingMessage = function (e: Error) {
   const fullMessage = e.toString();
   const boilerplateStart = fullMessage.indexOf(
     Spec.pendingSpecExceptionMessage,

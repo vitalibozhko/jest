@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import expect, {MatcherState} from 'expect';
+import expect, { MatcherState } from 'expect';
 import {
   addSerializer,
   toMatchSnapshot,
@@ -13,7 +13,7 @@ import {
   toThrowErrorMatchingSnapshot,
   toThrowErrorMatchingInlineSnapshot,
 } from 'jest-snapshot';
-import {RawMatcherFn, Jasmine} from './types';
+import { RawMatcherFn, Jasmine } from './types';
 
 type JasmineMatcher = {
   (matchersUtil: any, context: any): JasmineMatcher;
@@ -21,11 +21,11 @@ type JasmineMatcher = {
   negativeCompare: () => RawMatcherFn;
 };
 
-type JasmineMatchersObject = {[id: string]: JasmineMatcher};
+type JasmineMatchersObject = { [id: string]: JasmineMatcher };
 
-export default (config: {expand: boolean}) => {
+export default (config: { expand: boolean }) => {
   global.expect = expect;
-  expect.setState({expand: config.expand});
+  expect.setState({ expand: config.expand });
   expect.extend({
     toMatchInlineSnapshot,
     toMatchSnapshot,
@@ -44,7 +44,7 @@ export default (config: {expand: boolean}) => {
   jasmine.addMatchers = (jasmineMatchersObject: JasmineMatchersObject) => {
     const jestMatchersObject = Object.create(null);
     Object.keys(jasmineMatchersObject).forEach(name => {
-      jestMatchersObject[name] = function(
+      jestMatchersObject[name] = function (
         this: MatcherState,
         ...args: Array<unknown>
       ): RawMatcherFn {
@@ -55,15 +55,15 @@ export default (config: {expand: boolean}) => {
 
         return this.isNot
           ? negativeCompare.apply(
-              null,
-              // @ts-ignore
-              args,
-            )
+            null,
+            // @ts-ignore
+            args,
+          )
           : result.compare.apply(
-              null,
-              // @ts-ignore
-              args,
-            );
+            null,
+            // @ts-ignore
+            args,
+          );
       };
     });
 

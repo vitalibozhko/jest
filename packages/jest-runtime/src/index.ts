@@ -6,21 +6,21 @@
  */
 
 import path from 'path';
-import {Config} from '@jest/types';
+import { Config } from '@jest/types';
 import {
   Jest,
   JestEnvironment,
   LocalModuleRequire,
   Module,
 } from '@jest/environment';
-import {SourceMapRegistry} from '@jest/source-map';
-import jestMock, {MockFunctionMetadata} from 'jest-mock';
-import HasteMap, {ModuleMap} from 'jest-haste-map';
-import {formatStackTrace, separateMessageFromStack} from 'jest-message-util';
+import { SourceMapRegistry } from '@jest/source-map';
+import jestMock, { MockFunctionMetadata } from 'jest-mock';
+import HasteMap, { ModuleMap } from 'jest-haste-map';
+import { formatStackTrace, separateMessageFromStack } from 'jest-message-util';
 import Resolver from 'jest-resolve';
-import {createDirectory, deepCyclicCopy} from 'jest-util';
-import {escapePathForRegex} from 'jest-regex-util';
-import Snapshot from 'jest-snapshot';
+import { createDirectory, /* deepCyclicCopy */ } from 'jest-util';
+import { escapePathForRegex } from 'jest-regex-util';
+// import Snapshot from 'jest-snapshot';
 import {
   ScriptTransformer,
   ShouldInstrumentOptions,
@@ -29,10 +29,10 @@ import {
 } from '@jest/transform';
 import fs from 'graceful-fs';
 import stripBOM from 'strip-bom';
-import {run as cliRun} from './cli';
-import {options as cliOptions} from './cli/args';
-import {findSiblingsWithFileExtension} from './helpers';
-import {Context as JestContext} from './types';
+import { run as cliRun } from './cli';
+import { options as cliOptions } from './cli/args';
+import { findSiblingsWithFileExtension } from './helpers';
+import { Context as JestContext } from './types';
 
 type HasteMapOptions = {
   console?: Console;
@@ -51,8 +51,8 @@ type InitialModule = Partial<Module> &
 type ModuleRegistry = Map<string, InitialModule | Module>;
 type ResolveOptions = Parameters<typeof require.resolve>[1];
 
-type BooleanObject = {[key: string]: boolean};
-type CacheFS = {[path: string]: string};
+type BooleanObject = { [key: string]: boolean };
+type CacheFS = { [path: string]: string };
 
 namespace Runtime {
   export type Context = JestContext;
@@ -62,6 +62,7 @@ const testTimeoutSymbol = Symbol.for('TEST_TIMEOUT_SYMBOL');
 const retryTimesSymbol = Symbol.for('RETRY_TIMES');
 
 const NODE_MODULES = path.sep + 'node_modules' + path.sep;
+const SNAPSHOT_EXTENSION = 'snap';
 
 const getModuleNameMapper = (config: Config.ProjectConfig) => {
   if (
@@ -90,7 +91,7 @@ class Runtime {
   private _explicitShouldMock: BooleanObject;
   private _internalModuleRegistry: ModuleRegistry;
   private _isCurrentlyExecutingManualMock: string | null;
-  private _mockFactories: {[key: string]: () => unknown};
+  private _mockFactories: { [key: string]: () => unknown };
   private _mockMetaDataCache: {
     [key: string]: MockFunctionMetadata<unknown, Array<unknown>>;
   };
@@ -225,7 +226,7 @@ class Runtime {
       ...config.modulePathIgnorePatterns,
       ...(options && options.watch ? config.watchPathIgnorePatterns : []),
       config.cacheDirectory.startsWith(config.rootDir + path.sep) &&
-        config.cacheDirectory,
+      config.cacheDirectory,
     ].filter(Boolean);
     const ignorePattern =
       ignorePatternParts.length > 0
@@ -237,7 +238,8 @@ class Runtime {
       computeSha1: config.haste.computeSha1,
       console: options && options.console,
       dependencyExtractor: config.dependencyExtractor,
-      extensions: [Snapshot.EXTENSION].concat(config.moduleFileExtensions),
+      extensions: [SNAPSHOT_EXTENSION].concat(config.moduleFileExtensions),
+      // extensions: [Snapshot.EXTENSION].concat(config.moduleFileExtensions),
       hasteImplModulePath: config.haste.hasteImplModulePath,
       ignorePattern,
       maxWorkers: (options && options.maxWorkers) || 1,
@@ -363,7 +365,7 @@ class Runtime {
   }
 
   requireInternalModule(from: Config.Path, to?: string) {
-    return this.requireModule(from, to, {isInternalModule: true});
+    return this.requireModule(from, to, { isInternalModule: true });
   }
 
   requireActual(from: Config.Path, moduleName: string) {
@@ -564,7 +566,13 @@ class Runtime {
   }
 
   getAllCoverageInfoCopy() {
-    return deepCyclicCopy(this._environment.global.__coverage__);
+    return JSON.parse(JSON.stringify(this._environment.global.__coverage__))
+    // return deepCyclicCopy(this._environment.global.__coverage__);
+    // debugger;
+    // deepCyclicCopy(this._environment.global.__coverage__);
+    // var cov = this._environment.global.__coverage__;
+    // delete this._environment.global.__coverage__;
+    // return Object.assign({}, cov);
   }
 
   getSourceMapInfo(coveredFiles: Set<string>) {
@@ -590,7 +598,7 @@ class Runtime {
     from: string,
     moduleName: string,
     mockFactory: () => unknown,
-    options?: {virtual?: boolean},
+    options?: { virtual?: boolean },
   ) {
     if (options && options.virtual) {
       const mockPath = this._resolver.getModulePath(from, moduleName);
@@ -632,7 +640,7 @@ class Runtime {
       );
     }
 
-    const {paths} = options;
+    const { paths } = options;
 
     if (paths) {
       for (const p of paths) {
@@ -641,7 +649,7 @@ class Runtime {
           absolutePath,
           moduleName,
           // required to also resolve files without leading './' directly in the path
-          {paths: [absolutePath]},
+          { paths: [absolutePath] },
         );
         if (module) {
           return module;
@@ -809,7 +817,7 @@ class Runtime {
       if (mockMetadata == null) {
         throw new Error(
           `Failed to get mock metadata: ${modulePath}\n\n` +
-            `See: https://jestjs.io/docs/manual-mocks.html#content`,
+          `See: https://jestjs.io/docs/manual-mocks.html#content`,
         );
       }
       this._mockMetaDataCache[modulePath] = mockMetadata;
@@ -893,11 +901,11 @@ class Runtime {
 
     const moduleRequire = (options && options.isInternalModule
       ? (moduleName: string) =>
-          this.requireInternalModule(from.filename, moduleName)
+        this.requireInternalModule(from.filename, moduleName)
       : this.requireModuleOrMock.bind(
-          this,
-          from.filename,
-        )) as LocalModuleRequire;
+        this,
+        from.filename,
+      )) as LocalModuleRequire;
     moduleRequire.cache = Object.create(null);
     moduleRequire.extensions = Object.create(null);
     moduleRequire.requireActual = this.requireActual.bind(this, from.filename);
@@ -968,7 +976,7 @@ class Runtime {
     const setMockFactory = (
       moduleName: string,
       mockFactory: () => unknown,
-      options?: {virtual?: boolean},
+      options?: { virtual?: boolean },
     ) => {
       this.setMock(from, moduleName, mockFactory, options);
       return jestObject;
@@ -1084,11 +1092,11 @@ class Runtime {
       .filter(line => line.indexOf(__filename) === -1)
       .join('\n');
 
-    const {message, stack} = separateMessageFromStack(originalStack);
+    const { message, stack } = separateMessageFromStack(originalStack);
 
     console.error(
       `\n${message}\n` +
-        formatStackTrace(stack, this._config, {noStackTrace: false}),
+      formatStackTrace(stack, this._config, { noStackTrace: false }),
     );
   }
 }

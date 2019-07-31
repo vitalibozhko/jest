@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import prettyFormat from 'pretty-format';
+// import prettyFormat from 'pretty-format';
 
 export default function isError(potentialError: any) {
   // duck-type Error, see #2549
@@ -17,7 +17,8 @@ export default function isError(potentialError: any) {
 
   const message = isError
     ? null
-    : `Failed: ${prettyFormat(potentialError, {maxDepth: 3})}`;
+    : `Failed: ${potentialError}`;
+  // : `Failed: ${prettyFormat(potentialError, {maxDepth: 3})}`;
 
-  return {isError, message};
+  return { isError, message };
 }
